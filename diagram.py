@@ -59,8 +59,8 @@ def e_iU_plus_U_over_U( e, mats ):
     
     R1 = IntegerModRing( ZZ(p)**-dt )
     #return im
-    return matrix( R1, hnf( im )[0] )
-
+    im = matrix( R1, hnf( im )[0] )
+    return im[[x for x in range(im.nrows()) if not im[x].is_zero() ]]
 
 def diagram( G, mats ):
     """Constructs the Butler diagram for the Z_pG-module U. G must be a p-group. The action of 
