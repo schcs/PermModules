@@ -71,7 +71,7 @@ def hnf( mat0, normalize = True ):
     return mat, trans
 
 
-def row_reduce( mat, vec0 ):
+def row_reduce( mat, vec0, is_member = False ):
 
     if vec0.is_zero():
         return vec0, zero_vector( mat.nrows()), True
@@ -92,7 +92,10 @@ def row_reduce( mat, vec0 ):
             if vec.is_zero():
                 break
             lead_vec = vec.support()[0]
-                
+
+    if is_member:
+        assert vec.is_zero()
+
     return vec, coeffs, vec.is_zero()
 
 

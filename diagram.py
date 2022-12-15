@@ -85,6 +85,8 @@ def e_iU_plus_U_over_U( e, mats, depth = -1, V = [] ):
     For an idempontent u, the function calculates the space (e_iU+U)/U as a subspace of 
     the free Z/p^kZ-module where k=depth."""
 
+    #OBSOLATE
+
     # get some basic data about FG
     R = e.parent().base_ring()
     p = R.prime()
@@ -105,6 +107,9 @@ def diagram_V( G, mats ):
     The action of the generators of G is given by the matrices in mats. 
     Constructs the space V = (sum(V_i) + U)/U where the V_i are the subspaces 
     (e_iU+U)/U for the idempontents e_i of FG."""
+
+    # OBSOLATE
+
 
     p = ZZ(prime_divisors( G.order())[0])
     F = mats[0].base_ring()
@@ -158,7 +163,7 @@ def butler_diagram( G, mats ):
     count = 0
     for k in range( nr_ids ):
         for row in ims[k]:
-            row = vector( R0, row )
+            row = vector( R0(x) for x in row )
 
             if row.is_zero():
                 continue
@@ -191,14 +196,16 @@ def butler_diagram( G, mats ):
 
     mats_V = []
     for m in mats:
-        mats_V.append( matrix( [ row_reduce( matrix( gens_V ), r*matrix( R0, m ))[1] for r in gens_V ] ))
+        mats_V.append( matrix( [ row_reduce( matrix( gens_V ), r*matrix( R0, m ), is_member = true )[1] 
+                            for r in gens_V ] ))
 
     
     mats_Vi = [ [] for _ in range( nr_ids )]
     for i in range( nr_ids ):
         for m in mats:
             mei = matrix( R0, m )
-            mats_Vi[i].append( matrix( [ row_reduce( matrix( gens_Vi[i] ), r*mei )[1] for r in gens_Vi[i] ] ))
+            mats_Vi[i].append( matrix( [ row_reduce( matrix( gens_Vi[i] ), r*mei, is_member = True  )[1] 
+                            for r in gens_Vi[i] ] ))
 
 
     return ButlerDiagram( G, p, Q, Q.integer_ring(), R0, ids, mats, gens_V, gens_Vi, mats_V, mats_Vi )
