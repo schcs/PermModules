@@ -1,8 +1,9 @@
-p = 3
+#p = 3
+prec = 2
 G = AbelianGroup( [3,3] )
-F = QpER( p, print_mode = 'digits', secure = False )
-R = ZpER( p, print_mode = 'digits', secure = False )
-mats = [ matrix( F, [
+FF = QpER( 3, prec,  print_mode = 'digits', secure = False )
+#R = ZpER( p, prec,  print_mode = 'digits', secure = False )
+mats = [ matrix( FF, [
             [1, 0, -1, -1, -1, -1, 0, 0, 0, 0, 0,],
             [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
             [0, 0, -2, 0, 0, -1, 1, 0, 1, 0, 0,],
@@ -14,7 +15,7 @@ mats = [ matrix( F, [
             [0, 0, -3, 0, 0, -1, 1, 0, 1, 0, 0,],
             [0, 0, 0, -3, 0, -1, -1, 0, 0, 1, 0,],
             [0, 0, 0, 0, -3, -1, 0, 0, 0, 0, 1,]]),
-         matrix( F, [
+         matrix( FF, [
             [1, -1, 0, 1, -1, 0, 0, 0, 0, -1, 0,],
             [0, -2, 0, 0, 0, 0, -1, 1, 0, 0, 0,],
             [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,],
