@@ -209,13 +209,3 @@ def butler_diagram( G, mats ):
 
 
     return ButlerDiagram( G, p, Q, Q.integer_ring(), R0, ids, mats, gens_V, gens_Vi, mats_V, mats_Vi )
-                 
-    
-
-
-
-
-
-
-
-
