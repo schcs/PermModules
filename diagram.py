@@ -71,6 +71,26 @@ def image( el, mats ):
 
     return im 
 
+def idempotents_222( FG ):
+    
+    G = FG.group()
+    p = ZZ(prime_divisors( G.order())[0])
+    n, b, c = G.gens()
+    
+    # the sum of the elements of G
+
+    g_hat = sum( [ FG(x) for x in G ])
+    idems = [ p**-3*g_hat ]
+    max = [ G.subgroup( [n, b] ), G.subgroup( [n, c] ), G.subgroup( [b, c] ),
+            G.subgroup( [n*b, c] ), G.subgroup( [n*c, b] ), G.subgroup( [b*c, n] ), 
+            G.subgroup( [n*b, n*c] )]
+
+    for m in max:
+        idems.append( ZZ(p)**-3*( 2*sum( FG( x ) for x in m ) - g_hat ))
+    
+    return idems
+
+
 def idempotents( FG ):
     """Determines the idempotents of the group algebra FG.
     At the moment G must be C_p x C_p and F the field of p-adic numbers!"""
