@@ -256,6 +256,7 @@ def butler_diagram( G, mats ):
                 # insert row_Vi into the right position and insert its leading entry also
                 leads_Vi[k].insert( pos, le )
                 gens_Vi[k].insert( pos, row_Vi )
+                    
             
             # now we further reduce row_Vi agains the generators of V
             row_V = row_reduce( matrix( gens_V ), row_Vi )[0]
