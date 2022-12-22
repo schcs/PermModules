@@ -1,17 +1,3 @@
-<<<<<<< HEAD
-def normalizer_element( a ):
-
-    R = parent( a )
-    p = prime_divisors( R.order() )[0]
-    v = valuation( a, p )
-    return R( ZZ(a)//p**v )**-1
-
-def div_mod( a, b ):
-
-    R = parent( a )
-    return ZZ(a)//ZZ(b), ZZ(a) % ZZ(b)
- 
-=======
 def normalizing_element( a ):
 
     R = parent( a )
@@ -24,7 +10,6 @@ def normalizing_element( a ):
         v = valuation( a, p )
         return R(ZZ(a)//p**v)**-1 
 
->>>>>>> df25873cae5f58f404c715895cf7789c077b3a01
 def hnf( mat0, normalize = True ):
     
     """Hermite normal form for matrices over p-adic integers
