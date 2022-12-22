@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 def normalizer_element( a ):
 
     R = parent( a )
@@ -10,6 +11,20 @@ def div_mod( a, b ):
     R = parent( a )
     return ZZ(a)//ZZ(b), ZZ(a) % ZZ(b)
  
+=======
+def normalizing_element( a ):
+
+    R = parent( a )
+
+    if not R.is_finite():
+        p = R.prime()
+        return (a*(p**-valuation( a )))**-1
+    else:   
+        p = prime_divisors( R.order() )[0]
+        v = valuation( a, p )
+        return R(ZZ(a)//p**v)**-1 
+
+>>>>>>> df25873cae5f58f404c715895cf7789c077b3a01
 def hnf( mat0, normalize = True ):
     
     """Hermite normal form for matrices over p-adic integers
@@ -37,20 +52,24 @@ def hnf( mat0, normalize = True ):
                 for k in range( i, m ):
                     for l in range( k+1, m ):
                         if mat[k,j] != 0 and mat[l,j] != 0:
-                            stop_flag = false
-                            if valuation( mat[k,j], p ) <= valuation( mat[l,j], p ):
-                                q = mat[l,j]/mat[k,j]
-                                mat.add_multiple_of_row( l, k, -q )
-                                trans.add_multiple_of_row( l, k, -q )
+                            #stop_flag = false
+                            q1 = mat[l,j]//mat[k,j]
+                            q2 = mat[k,j]//mat[l,j]
+                            if q1 != R.zero(): #valuation( mat[k,j], p ) <= valuation( mat[l,j], p ):
+                                #q = mat[l,j]//mat[k,j]
+                                mat.add_multiple_of_row( l, k, -q1 )
+                                trans.add_multiple_of_row( l, k, -q1 )
                                 #print( "add", -q,  "times row ", k, "to row", l )
-                            else: 
-                                q = mat[k,j]/mat[l,j]
-                                mat.add_multiple_of_row( k, l, -q )
-                                trans.add_multiple_of_row( k, l, -q )
+                                stop_flag = false 
+                            elif q2 != R.zero(): 
+                                #q = mat[k,j]//mat[l,j]
+                                mat.add_multiple_of_row( k, l, -q2 )
+                                trans.add_multiple_of_row( k, l, -q2 )
                                 #print( "add", -q,  "times row ", l, "to row", k )
-
+                                stop_flag = false
                 if stop_flag:
                     break 
+                print( "mat is", mat )
             
             for k in range(i,m):
                 if mat[k,j] != 0:
@@ -72,14 +91,16 @@ def hnf( mat0, normalize = True ):
             #print( "after norm", mat[i,j] )
 
             for l in range(i):
-                if valuation( mat[l,j], p ) >= valuation( mat[i,j], p ):
-                    q = mat[l,j]/mat[i,j]
+                if True: # or valuation( mat[l,j], p ) >= valuation( mat[i,j], p ):
+                    q = mat[l,j]//mat[i,j]
                     mat.add_multiple_of_row( l, i, -q )
                     trans.add_multiple_of_row( l, i, -q )
                     #print( "add", -q,  "times row ", i, "to row", l )
 
             
             i += 1; j += 1
+    
+    assert trans*mat0 == mat
     return mat, trans
 
 def row_reduce( mat, vec0, is_member = False ):
