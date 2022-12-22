@@ -71,6 +71,9 @@ def image( el, mats ):
 
     return im 
 
+def klein_subgroup( a, b ):
+    return [a**0, a, b, a*b ]
+
 def idempotents_222( FG ):
     
     G = FG.group()
@@ -80,10 +83,10 @@ def idempotents_222( FG ):
     # the sum of the elements of G
 
     g_hat = sum( [ FG(x) for x in G ])
-    idems = [ p**-3*g_hat ]
-    max = [ G.subgroup( [n, b] ), G.subgroup( [n, c] ), G.subgroup( [b, c] ),
-            G.subgroup( [n*b, c] ), G.subgroup( [n*c, b] ), G.subgroup( [b*c, n] ), 
-            G.subgroup( [n*b, n*c] )]
+    idems = [ ZZ(p)**-3*g_hat ]
+    max = [ klein_subgroup( n, b ), klein_subgroup( n, c ), klein_subgroup( b, c ),
+            klein_subgroup( n*b, c ), klein_subgroup( n*c, b ), klein_subgroup( b*c, n ), 
+            klein_subgroup( n*b, n*c )]
 
     for m in max:
         idems.append( ZZ(p)**-3*( 2*sum( FG( x ) for x in m ) - g_hat ))
@@ -97,8 +100,12 @@ def idempotents( FG ):
 
     G = FG.group()
     p = ZZ(prime_divisors( G.order())[0])
-    n, c = G.gens()
     
+    if G.elementary_divisors() == (2,2,2):
+        return idempotents_222( FG )
+
+    n, c = G.gens()
+
     # the sum of the elements of G
     g_hat = sum( [ FG(x) for x in G ])
 
@@ -201,7 +208,9 @@ def butler_diagram( G, mats ):
     ims = [ p**-depth*im for im in ims ]
 
     # Z/p**-depth Z will be the residue class ring over which the spaces V and Vi are defined
-    R0 = IntegerModRing( ZZ(p)**-depth )
+    #R0 = IntegerModRing( ZZ(p)**-depth )
+
+    R0 = Q
 
     # se set up the lists for the generators of V and the Vi
     gens_V = []
@@ -221,7 +230,7 @@ def butler_diagram( G, mats ):
 
             # row is the image of e_j under the k-th idempotent considered over 
             # the residue class ring R0
-            row = vector( R0(x) for x in row )
+            # row = vector( R0(x) for x in row )
             
             # if row is zero, nothing to do
             if row.is_zero():
@@ -276,4 +285,5 @@ def butler_diagram( G, mats ):
                     r*mei, is_member = True  )[1] for r in gens_Vi[i] ] ))
 
     # Build the Butler diagram and return
-    return ButlerDiagram( G, p, Q, Q.integer_ring(), R0, ids, mats, gens_V, gens_Vi, mats_V, mats_Vi )
+    return ButlerDiagram( G, p, Q, Q.integer_ring(), 
+                IntegerModRing( p**-depth ), ids, mats, gens_V, gens_Vi, mats_V, mats_Vi )
