@@ -71,6 +71,9 @@ def image( el, mats ):
 
     return im 
 
+def sub_klein( a, b ):
+    return [a**0,a,b,a*b]
+
 def idempotents_222( FG ):
     
     G = FG.group()
@@ -81,9 +84,9 @@ def idempotents_222( FG ):
 
     g_hat = sum( [ FG(x) for x in G ])
     idems = [ p**-3*g_hat ]
-    max = [ G.subgroup( [n, b] ), G.subgroup( [n, c] ), G.subgroup( [b, c] ),
-            G.subgroup( [n*b, c] ), G.subgroup( [n*c, b] ), G.subgroup( [b*c, n] ), 
-            G.subgroup( [n*b, n*c] )]
+    max = [ sub_klein( n, b ), sub_klein( n, c ), sub_klein( b, c ),
+            sub_klein( n*b, c ), sub_klein( n*c, b ), sub_klein( b*c, n ), 
+            sub_klein( n*b, n*c )]
 
     for m in max:
         idems.append( ZZ(p)**-3*( 2*sum( FG( x ) for x in m ) - g_hat ))
@@ -95,8 +98,13 @@ def idempotents( FG ):
     """Determines the idempotents of the group algebra FG.
     At the moment G must be C_p x C_p and F the field of p-adic numbers!"""
 
+
     G = FG.group()
     p = ZZ(prime_divisors( G.order())[0])
+
+    if G.elementary_divisors() == (2,2,2):
+        return idempotents_222( FG)
+
     n, c = G.gens()
     
     # the sum of the elements of G
@@ -221,7 +229,7 @@ def butler_diagram( G, mats ):
 
             # row is the image of e_j under the k-th idempotent considered over 
             # the residue class ring R0
-            row = vector( R0(x) for x in row )
+            #row = vector( R0(x) for x in row )
             
             # if row is zero, nothing to do
             if row.is_zero():
@@ -261,11 +269,13 @@ def butler_diagram( G, mats ):
                 leads_V.insert( pos, le )
                 gens_V.insert( pos, row_V )    
 
+    return gens_V, gens_Vi
+
     # compute the matrices that define the G action on V
     mats_V = []
     for m in mats:
         mats_V.append( matrix( [ row_reduce( matrix( gens_V ), 
-                            r*matrix( R0, m ), is_member = true )[1] for r in gens_V ] ))
+                            r*matrix( m ), is_member = false )[1] for r in gens_V ] ))
 
 
     # compute the matrices that define the G-action on the Vi 
