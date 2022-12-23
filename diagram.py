@@ -31,6 +31,8 @@ class ButlerDiagram:
     def __repr__( self ):
         return f'Butler diagram for the group {self.group} over {self.padic_ring}'
 
+def leading_position( vec ):
+    return vec.support()[0]
     
 def depth( el ):
     """The depth of a vector with entries in a p-adic field or integer ring. 
@@ -209,9 +211,7 @@ def butler_diagram( G, mats ):
     ims = [ p**-depth*im for im in ims ]
 
     # Z/p**-depth Z will be the residue class ring over which the spaces V and Vi are defined
-    #R0 = IntegerModRing( ZZ(p)**-depth )
-
-    R0 = Q
+    R0 = IntegerModRing( ZZ(p)**-depth )
 
     # se set up the lists for the generators of V and the Vi
     gens_V = []
@@ -224,60 +224,31 @@ def butler_diagram( G, mats ):
     leads_Vi = [[] for _ in range( nr_ids )]
 
 
-    # compute the generators of the subspace V and for the subspaces Vi at the 
-    # same time
+    # Compute the generators for the subspaces Vi
     for k in range( nr_ids ):   
         for row in ims[k]:
+            for z in range( -depth ):
+                vec = vector( R0(x) for x in p**z*row )
+                if vec.is_zero():
+                    break
+                gens_Vi[k].append( vec )
+        
+        gens_Vi[k] = hnf( matrix( gens_Vi[k] ))[0]
+        gens_Vi[k] = matrix( [ x for x in gens_Vi[k] if not x.is_zero()])
 
-            # row is the image of e_j under the k-th idempotent considered over 
-            # the residue class ring R0
-            # row = vector( R0(x) for x in row )
-            
-            # if row is zero, nothing to do
-            if row.is_zero():
-                continue
-            
-            # we reduce row against the already found generators of Vi[k]
-            row_Vi = row_reduce( matrix( gens_Vi[k]), row )[0]
+    for i in range( nr_ids ):
+        for r in gens_Vi[i]:
+            gens_V.append( r )
 
-            # if the reduction is zero, then nothing more to do
-            if row_Vi.is_zero():
-                continue
-            else:
-                # we insert the reduction of row into the generators of Vi[k]
-                le = row_Vi.support()[0] # the leading entry of row
-
-                # we normalize the leading entry
-                q = row_Vi[le]*ZZ(p)**-valuation( row_Vi[le], p ) 
-                row_Vi /= q**-1
-
-                # find the positin of row_Vi in the matrix Vi[k]
-                _, pos = search( leads_Vi[k], le )
-
-                # insert row_Vi into the right position and insert its leading entry also
-                leads_Vi[k].insert( pos, le )
-                gens_Vi[k].insert( pos, row_Vi )
-                    
-            
-            # now we further reduce row_Vi agains the generators of V
-            row_V = row_reduce( matrix( gens_V ), row_Vi )[0]
-
-            if not row_V.is_zero():
-                # we repeat the same computation as we did after the last if statement
-                le = row_V.support()[0]
-                q = row_V[le]*ZZ(p)**-valuation( row_V[le], p )
-                row_V /= q**-1
-                _, pos = search( leads_V, le )
-                leads_V.insert( pos, le )
-                gens_V.insert( pos, row_V )    
-
-    return gens_V, gens_Vi
+    gens_V = hnf( matrix( gens_V ))[0]
+    gens_V = matrix( [ x for x in gens_V if not x.is_zero()])
 
     # compute the matrices that define the G action on V
     mats_V = []
     for m in mats:
+        mei = matrix( R0, m )
         mats_V.append( matrix( [ row_reduce( matrix( gens_V ), 
-                            r*matrix( m ), is_member = false )[1] for r in gens_V ] ))
+                            r*mei, is_member = True )[1] for r in gens_V ] ))
 
 
     # compute the matrices that define the G-action on the Vi 
@@ -287,7 +258,6 @@ def butler_diagram( G, mats ):
             mei = matrix( R0, m )
             mats_Vi[i].append( matrix( [ row_reduce( matrix( gens_Vi[i] ), 
                     r*mei, is_member = True  )[1] for r in gens_Vi[i] ] ))
-
-    # Build the Butler diagram and return
+    
     return ButlerDiagram( G, p, Q, Q.integer_ring(), 
                 IntegerModRing( p**-depth ), ids, mats, gens_V, gens_Vi, mats_V, mats_Vi )
