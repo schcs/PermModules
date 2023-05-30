@@ -85,6 +85,7 @@ def idempotents_222( FG ):
     # the sum of the elements of G
 
     g_hat = sum( [ FG(x) for x in G ])
+    print( g_hat )
     idems = [ ZZ(p)**-3*g_hat ]
     max = [ klein_subgroup( n, b ), klein_subgroup( n, c ), klein_subgroup( b, c ),
             klein_subgroup( n*b, c ), klein_subgroup( n*c, b ), klein_subgroup( b*c, n ), 
