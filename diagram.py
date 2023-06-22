@@ -234,8 +234,6 @@ def check_lifting_action_diagram( d ):
     
     return True
 
-    
-
 def butler_diagram( G, mats ):
     """Constructs the Butler diagram for the Z_pG-module U. G must be a p-group. The action of 
     the generators of G on U is determined by the matrices in mats."""
