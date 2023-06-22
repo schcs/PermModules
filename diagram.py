@@ -62,14 +62,15 @@ def image( el, mats ):
 
     #initialize with the zero matrix
     im = 0*mats[0]
+    R_mats = mats[0][0,0].parent()
     
     #take the dictionary with the terms and their coefficients
     terms = el.monomial_coefficients()
-
+    
     for mon, coeff in terms.items():
         exps = mon.exponents()
         pr = prod( mats[m]**exps[m] for m in range(len(exps)))
-        im += coeff*pr
+        im += R_mats(coeff)*pr
 
     return im 
 
@@ -186,6 +187,54 @@ def diagram_V( G, mats ):
     
     return gens_V
     return matrix( R, gens_V )
+
+def relations_eiZpG( ei ):
+
+    A = ei.parent()
+    G = A.group()
+    p = ZZ(prime_divisors( G.order())[0])
+    F = A.base_ring()
+    mat = []
+
+    for g in G:
+        pr = g*ei
+        moncoef = pr.monomial_coefficients()
+        vec = vector( [ moncoef[g] for g in G ])
+        mat.append( vec )
+    
+    mat = matrix( mat )
+    k = depth_matrix( mat )
+    #return mat, k
+    return hnf((p**-k)*mat, normalize = true )[0]
+
+def check_lifting_action_module( ei, mats ):
+    
+    A = ei.parent()
+    G = A.group()
+    p = ZZ(prime_divisors( G.order())[0])
+    F = A.base_ring()
+    mat = relations_eiZpG( ei )
+    els = [ g for g in G ]
+    
+    for row in mat:
+        r = sum( row[k]*A(els[k]) for k in range( G.order()))
+        im = image( r, mats )
+        if im != 0*im:
+            return False
+        
+    return True
+
+def check_lifting_action_diagram( d ):
+    ids = d.idempotents
+    mods = d.action_Vi
+
+    for i in range( len( ids )):
+        if not check_lifting_action_module( ids[i], mods[i] ):
+            return False
+    
+    return True
+
+    
 
 def butler_diagram( G, mats ):
     """Constructs the Butler diagram for the Z_pG-module U. G must be a p-group. The action of 
