@@ -172,68 +172,6 @@ def idempotents( FG ):
     
     return idems
 
-def e_iU_plus_U_over_U( e, mats, depth = -1, V = [] ):
-    """Suppose U is an FG-module for a finite p-group G and F a p-adic field. 
-    The action of the generators of G is given by the matrices in mats. 
-    For an idempontent u, the function calculates the space (e_iU+U)/U as a subspace of 
-    the free Z/p^kZ-module where k=depth."""
-
-    #OBSOLATE WILL BE REMOVED
-
-    # get some basic data about FG
-    R = e.parent().base_ring()
-    p = R.prime()
-    R0 = IntegerModRing( p**-depth )
-
-    # calculate the image of e over R0
-    im = matrix( R0, ZZ(p)**-depth*image( e, mats ))
-
-    # calculate HNF for standard basis
-    im = matrix( R0, hnf( im )[0] )
-
-    # remove zeros
-    return im[[x for x in range(im.nrows()) if not im[x].is_zero() ]]
-
-#
-def diagram_V( G, mats ):
-    """Suppose U is an FG-module for a finite p-group G and F a p-adic field. 
-    The action of the generators of G is given by the matrices in mats. 
-    Constructs the space V = (sum(V_i) + U)/U where the V_i are the subspaces 
-    (e_iU+U)/U for the idempontents e_i of FG."""
-
-    # OBSOLATE WILL BE REMOVED
-
-
-    p = ZZ(prime_divisors( G.order())[0])
-    F = mats[0].base_ring()
-    FG = GroupAlgebra( G, F )
-    ids = idempotents( FG )
-    ims = [ image( id, mats ) for id in ids ]
-    dt = depth_matrix_list( ims )
-    R = IntegerModRing( p**-dt )    
-
-    gens_V = []
-    leads = []
-
-    for im in ims:
-        im0 = matrix(R, ZZ(p)**-dt*im) 
-
-        for r in im0:
-            if r.is_zero():
-                continue
-            rr = row_reduce( matrix( R, gens_V ), r )[0]
-            #return rr
-            if not rr.is_zero():
-                le = rr.support()[0]
-                q = rr[le]*ZZ(p)**-valuation( rr[le], p )
-                rr /= q**-1
-                _, pos = search( leads, le )
-                leads.insert( pos, le )
-                gens_V.insert( pos, rr ) 
-    
-    return gens_V
-    return matrix( R, gens_V )
-
 def relations_eiZpG( ei ):
 
     A = ei.parent()
