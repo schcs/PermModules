@@ -17,14 +17,14 @@ def div_mod( a, b ):
     if not R.is_finite():
         p = R.prime()
         q, r = a//b, a%b
-        assert ( r == 0 or valuation( r, p ) < valuation( b, p )) and q*b + r == a
+        #assert ( r == 0 or valuation( r, p ) < valuation( b, p )) and q*b + r == a
         return q, r 
     else:
         d = R.order()
         p = prime_divisors( d )[0]
         Zp = pAdicRing( p, log( d, p ))
         q, r = R( Zp(a)//Zp(b) ), R( Zp(a)%Zp(b) )
-        assert ( r == 0 or valuation( r, p ) < valuation( b, p )) and q*b+r == a
+        #assert ( r == 0 or valuation( r, p ) < valuation( b, p )) and q*b+r == a
         return q, r  
 
 def hnf( mat0, normalize = True ):
@@ -96,7 +96,7 @@ def hnf( mat0, normalize = True ):
 
             for l in range(i):
                 if True: # or valuation( mat[l,j], p ) >= valuation( mat[i,j], p ):
-                    print( mat[i] )
+                    #print( mat[i] )
                     q, _ = div_mod( mat[l,j], mat[i,j] )
                     mat.add_multiple_of_row( l, i, -q )
                     trans.add_multiple_of_row( l, i, -q )

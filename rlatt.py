@@ -4,7 +4,7 @@
 
 class Reticulado2:
     """The data structure to store information related to a GZ_p-lattice."""
-    __init__( self, G, mat_gens ):
+    def __init__( self, G, mat_gens ):
 
         self.group = G
         self.mat_gens = mat_gens 
@@ -58,12 +58,14 @@ def mudança(p,k,gen1,gen2,mat):# gen1 é lista de elementos de um módulo que d
 # create the lattice from the butler diagram
 
 def lattice( diag ):
-    G = diag.G
-    mats = diag.action_Vi
-    
-    k,r,mats, V_i_gens, mat_lambda_i
-    # primeiro calculamos JVi e os quocientes Vi/JVi
 
+    G = diag.group
+    ids = diag.idempotents
+    k = -depth_list( [ x.coefficients() for x in ids ])
+    r = len( diag.Vi )
+    mats = diag.action_Vi
+    V_i_gens = diag.Vi
+    mat_lambda_i = [ Lambda_i_basis( x ) for x in ids ]
     p=ZZ(prime_divisors(G.order())[0])
     
     R=Zp(p)
@@ -71,7 +73,7 @@ def lattice( diag ):
     l=len(vector(V_i_gens[0][0]))
 
     F0=ZZ**l
-
+    #return F0
     F1=F0.submodule(p**k*gens(F0)[j] for j in range(l))
 
     F2=F0/F1
@@ -144,11 +146,12 @@ def lattice( diag ):
     
     F_act=[[] for _ in range(len(gens(G)))]
     for j in range(len(gens(G))):
-        blocks = sum( D[x]*mat_lambda_i[x] for x in range(len(D)), [] )
+        blocks = sum( [ D[x]*mat_lambda_i[x] for x in range(len(D)) ], [] )
         F_act[j] = block_diagonal_matrix( blocks ) #mat_act(D,mat_lambda_i[j],r)
         
     U_acts=[[] for _ in range(len(gens(G)))]
     for j in range(len(gens(G))):
         U_acts[j]=act_U(F_act[j],U)
-        
-    return Reticulado(G,p,R,Vi,mats,k,l,D,U,f,F_act,U_acts,mat_lambda_i)
+
+    return True  
+#    return Reticulado(G,p,R,Vi,mats,k,l,D,U,f,F_act,U_acts,mat_lambda_i)

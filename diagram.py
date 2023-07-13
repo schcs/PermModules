@@ -7,21 +7,21 @@ class ButlerDiagram:
     self.padic_field:           the underlying p-adic field F
     self.residue_class_ring:    the residue class ring for which the V and Vi are modules
     self.idempotents:           the idempotents of FG
-    self.action:                the action of G on the original module U
+#    self.action:                the action of G on the original module U  TO BE DELETED
     self.V:                     the space V in the diagram
     self.Vi:                    the list of spaces Vi in the diagram
     self.action_V:              the matrices defining the action of G on V
     self.action_Vi:             the sequence of matrices defining the action of G on the Vi
 
     """
-    def __init__( self, group, p, R, F, R0, ids, mats, V, Vi, V_gens, Vi_gens ):
+    def __init__( self, group, p, R, F, R0, ids, V, Vi, V_gens, Vi_gens ):
         self.group = group
         self.p = p
         self.padic_ring = R
         self.padic_field = F
         self.residue_class_ring = R0
         self.idempotents = ids
-        self.action = mats
+#        self.action = mats
         self.V = V
         self.Vi = Vi
         self.action_V = V_gens
@@ -97,6 +97,52 @@ def idempotents_222( FG ):
     
     return idems
 
+# calculate the support of an idempotent
+# idempotents are of the form 1/p^2(sum(G)) or 1/p^2(sum(H)-sum(G))
+# In the first case, it returns nothing, in the second case it returns a generator of H
+# Only works for C_p x C_p
+def idempotent_subgroup( idem ):
+    
+    p = idem.coefficients()[0].parent().prime()    
+    mon_coeff = idem.monomial_coefficients()
+    for k in mon_coeff.keys():
+        if mon_coeff[k] == 1/p-1/p**2 and k != k**0:
+            return k
+    
+    return False
+ 
+def Lambda_i_basis( idem ):
+    
+    R = idem.coefficients()[0].parent()
+    p = R.prime()
+    G = idem.parent().group()
+    Ggens = G.gens()
+    x, y = Ggens
+    if x*idem == idem and y*idem == idem:
+        return [ matrix( R, 1, 1, [1] ), matrix( R, 1, 1, [1] )], [G.one()]
+    elif x*idem != idem:
+        x0 = x
+    else:
+        x0 = y
+    
+    mat, els, g_els = [], [], []
+    for k in range( p-1 ):
+        el = x0**k*idem 
+        mat.append( el.coefficients())
+        els.append( el )
+        g_els.append( x0**k )
+
+    mat = Matrix( mat )
+    mats = [[] for _ in range( len( Ggens ))]
+
+    for i in range( len( Ggens )):
+        g = Ggens[i]
+        for el in els:
+            coeffs = mat.solve_left( vector((g*el).coefficients()))
+            mats[i].append( coeffs )
+
+    return  [ matrix( mat ) for mat in mats ], g_els
+    
 
 def idempotents( FG ):
     """Determines the idempotents of the group algebra FG.
@@ -202,7 +248,7 @@ def relations_eiZpG( ei ):
         vec = vector( [ moncoef[g] for g in G ])
         mat.append( vec )
     
-    mat = matrix( mat )
+    mat = matrix( mat, sparse = False )
     k = depth_matrix( mat )
     #return mat, k
     return hnf((p**-k)*mat, normalize = true )[0]
@@ -234,12 +280,12 @@ def check_lifting_action_diagram( d ):
     
     return True
 
-def butler_diagram( G, mats ):
+def butler_diagram( lat ):
     """Constructs the Butler diagram for the Z_pG-module U. G must be a p-group. The action of 
     the generators of G on U is determined by the matrices in mats."""
 
-    # first collect data from G and mats
-
+    # first collect data from lat
+    G, mats = lat.group, lat.mat_gens
     p = ZZ(prime_divisors( G.order())[0])
     Q = mats[0][0,0].parent()
     FG = GroupAlgebra( G, Q )
@@ -271,14 +317,13 @@ def butler_diagram( G, mats ):
     # the same for each of the Vi
     leads_Vi = [[] for _ in range( nr_ids )]
 
-
     # Compute the generators for the subspaces Vi
     for k in range( nr_ids ):   
         for row in ims[k]:
             for z in range( -depth ):
-                vec = vector( R0(x) for x in p**z*row )
+                vec = vector( R0(x) for x in p**z*row ); 
                 if vec.is_zero():
-                    break
+                    continue
                 gens_Vi[k].append( vec )
         
         gens_Vi[k] = hnf( matrix( gens_Vi[k] ))[0]
@@ -308,4 +353,4 @@ def butler_diagram( G, mats ):
                     r*mei, is_member = True  )[1] for r in gens_Vi[i] ] ))
     
     return ButlerDiagram( G, p, Q, Q.integer_ring(), 
-                IntegerModRing( p**-depth ), ids, mats, gens_V, gens_Vi, mats_V, mats_Vi )
+                IntegerModRing( p**-depth ), ids, gens_V, gens_Vi, mats_V, mats_Vi )
