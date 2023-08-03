@@ -95,7 +95,7 @@ def hnf( mat0, normalize = True ):
             #print( "after norm", mat[i,j] )
 
             for l in range(i):
-                if True: # or valuation( mat[l,j], p ) >= valuation( mat[i,j], p ):
+                if valuation( mat[l,j], p ) >= valuation( mat[i,j], p ):
                     #print( mat[i] )
                     q, _ = div_mod( mat[l,j], mat[i,j] )
                     mat.add_multiple_of_row( l, i, -q )

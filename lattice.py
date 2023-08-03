@@ -26,14 +26,14 @@ def lattice_from_diagram( diag ):
     ids = diag.idempotents
     no_ids = len( ids )
     r = len( diag.Vi )
-    dimV = diag.V.dimensions()[0] 
+    dimV = diag.V.dimensions()[1] 
     V = GF(p)**dimV 
-
+    
     # calculating the G-action on the Lambda_i
     lambdas = [ Lambda_i_basis( i ) for i in ids ]
     # we calculate the Jacobson radicals for the modules in the diagram
     jacobson_radicals = [ jacobson_radical( mats ) for mats in diag.action_Vi ]
-
+    
     # this will hold the multiplicities of the Lambda_i
     lambda_multiplicities = []
 
@@ -55,13 +55,13 @@ def lattice_from_diagram( diag ):
 
         # this will hold the images of the map Lambda_i^r_i -> V
         images_i = []
-
+    
         for j in range( ri ):
             for m in acting_elements_mat:
                 images_i.append( image_vector_under_action( diag.Vi[i], m, comp.basis()[j]))
 
         images += images_i 
-
+    
     images = matrix( GF( p ), images )
     ims_ker = matrix( ZZ, [ x for x in images.left_kernel().basis()])
     ims_ker = [ x for x in matrix( R, ims_ker )]
@@ -71,6 +71,7 @@ def lattice_from_diagram( diag ):
         ims_ker.append( p*b )
     
     mat = hnf( matrix( R, ims_ker ))[0]
+    
     mat = matrix( x for x in mat if not x.is_zero())
 
     dim_U = mat.dimensions()[0]
