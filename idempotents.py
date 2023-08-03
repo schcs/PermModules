@@ -34,3 +34,59 @@ def idempotent_subgroup( idem ):
             return k
     
     return False
+
+def idempotents( FG ):
+    """Determines the idempotents of the group algebra FG.
+    At the moment G must be C_p x C_p and F the field of p-adic numbers!"""
+
+
+    G = FG.group()
+    p = ZZ(prime_divisors( G.order())[0])
+    
+    if G.elementary_divisors() == (2,2,2):
+        return idempotents_222( FG )
+
+    n, c = G.gens()
+
+    # the sum of the elements of G
+    g_hat = sum( [ FG(x) for x in G ])
+
+    # the idempotent e_0
+    idems = [ p**-2*g_hat ]
+
+    # the idempotent corresponding to the subgroup <n>
+    idems.append( (p**-2)*(p*sum([ FG(n**k) for k in range(p)]) - g_hat ))
+
+    for i in range(p): 
+        # the idempotent corresponding to the subgroup <cn^i>
+        idems.append( p**-2*(p*sum([ FG((c*n**i)**k) for k in range( p )]) - g_hat ))
+    
+    return idems
+
+def group_element_from_gap( g, el ):
+    
+    rep_el = el.ExtRepOfObj()
+    if rep_el == []:
+        return g.one()
+
+    g_gens = g.gens()
+    return prod( [ g.gens()[int(rep_el[2*i+1])-1]**int(rep_el[2*i+2]) for i in range( len( rep_el )//2 )])
+    
+def get_idempotents_from_gap( g ):
+
+    p = prime_divisors( g.order())[0]
+
+    gapA = gap.GroupRing( QQ, g )
+    gapids = gap.CentralIdempotentsOfAlgebra( gapA )
+    print( "Central idempotents computer by GAP" )
+
+    F = pAdicField( p, 10, print_mode = "digits" )
+    A = GroupAlgebra( g, F )
+
+    ids = []
+    for i in gapids:
+        comp_list = i.CoefficientsAndMagmaElements()
+        ids.append( sum( F(comp_list[2*i+2])*A(group_element_from_gap( g, comp_list[2*i+1])) 
+                for i in range( len( comp_list )//2 )))
+
+    return ids 

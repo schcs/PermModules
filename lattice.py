@@ -25,7 +25,7 @@ def lattice_from_diagram( diag ):
     ids = diag.idempotents
     no_ids = len( ids )
     r = len( diag.Vi )
-    dimV = diag.V.dimensions()[1] 
+    dimV = diag.V.dimensions()[0] 
     V = GF(p)**dimV 
 
     # calculating the G-action on the Lambda_i
