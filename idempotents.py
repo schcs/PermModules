@@ -72,21 +72,24 @@ def group_element_from_gap( g, el ):
     g_gens = g.gens()
     return prod( [ g.gens()[int(rep_el[2*i+1])-1]**int(rep_el[2*i+2]) for i in range( len( rep_el )//2 )])
     
-def get_idempotents_from_gap( g ):
-
-    p = prime_divisors( g.order())[0]
-
-    gapA = gap.GroupRing( QQ, g )
-    gapids = gap.CentralIdempotentsOfAlgebra( gapA )
-    print( "Central idempotents computer by GAP" )
-
-    F = pAdicField( p, 10, print_mode = "digits" )
-    A = GroupAlgebra( g, F )
+def get_idempotents_from_gap( g, F = False ):
 
     ids = []
-    for i in gapids:
-        comp_list = i.CoefficientsAndMagmaElements()
-        ids.append( sum( F(comp_list[2*i+2])*A(group_element_from_gap( g, comp_list[2*i+1])) 
-                for i in range( len( comp_list )//2 )))
+    gap_g = gap( g )
 
-    return ids 
+    p = prime_divisors( g.order())[0]
+    if type( F ) == bool:
+        F = pAdicField( p, 10, print_mode = "digits" ) 
+
+    cc = gap.ConjugacyClassesSubgroups( g )
+    cc = gap.List( cc, gap.Representative )
+    return cc
+    subgroups_cyclic_quot = []
+
+    for h in cc:
+        if gap.IsCyclic( gap_g/h ):
+            subgroups_cyclic_quot.append( h )            
+
+
+    return subgroups_cyclic_quot
+

@@ -3,10 +3,11 @@
 class padicLattice:
     """The data structure to store information related to a GZ_p-lattice."""
     def __init__( self, G, mat_gens ):
-        self.group = G
-        self.mat_gens = mat_gens 
-        self.p = prime_divisors( G.order())[0]
-        self.padic_ring = mat_gens[0][0][0].parent()
+        self.group = G                                 # the acting group
+        self.mat_gens = mat_gens                       # the matrix generator
+                                                       # that correspond to the generators of G
+        self.p = prime_divisors( G.order())[0]         # the prime p
+        self.padic_ring = mat_gens[0][0][0].parent()   # the p-adic ring
 
     def __repr__( self ):
         return f'{self.p}-adic lattice for {self.group}'
