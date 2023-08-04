@@ -49,7 +49,7 @@ def butler_diagram( lat ):
 
     # calculate the images of the idempontents under the representation
     ims = [ image( e, mats ) for e in ids ]
-
+    
     # we determine the largest k such that p^-k appears in the matrix entries 
     # -k is the depth
     depth = depth_matrix_list( ims )
@@ -71,6 +71,7 @@ def butler_diagram( lat ):
     leads_Vi = [[] for _ in range( nr_ids )]
 
     # Compute the generators for the subspaces Vi
+    
     for k in range( nr_ids ):   
         for row in ims[k]:
             for z in range( -depth ):

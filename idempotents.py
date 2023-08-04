@@ -83,7 +83,7 @@ def get_idempotents_from_gap( g, F = False ):
 
     cc = gap.ConjugacyClassesSubgroups( g )
     cc = gap.List( cc, gap.Representative )
-    return cc
+    
     subgroups_cyclic_quot = []
 
     for h in cc:

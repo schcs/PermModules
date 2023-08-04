@@ -50,6 +50,7 @@ def lattice_from_diagram( diag ):
         lambda_multiplicities.append( ri )
         # the list of elements that we need to define the images of the generators of the 
         # Lambda_i
+
         acting_elements =  lambdas[i][1]
         acting_elements_mat = [ image( FG( x ), diag.action_Vi[i] ) for x in acting_elements ]
 

@@ -65,11 +65,10 @@ def relations_eiZpG( ei ):
         moncoef = pr.monomial_coefficients()
         vec = vector( [ moncoef[g] for g in G ])
         mat.append( vec )
-    
+
     mat = matrix( mat, sparse = False )
-    k = depth_matrix( mat )
-    #return mat, k
-    return hnf((p**-k)*mat, normalize = true )[0]
+    mat_kernel = mat.left_kernel()
+    return matrix( mat_kernel.basis())
 
 def check_lifting_action_module( ei, mats ):
     
@@ -95,7 +94,7 @@ def check_lifting_action_diagram( d ):
     for i in range( len( ids )):
         if not check_lifting_action_module( ids[i], mods[i] ):
             return False
-    
+
     return True
 
 
@@ -104,9 +103,12 @@ def check_lifting_action_diagram( d ):
 
 def jacobson_radical( mats ):
 
-    F = mats[0][0,0].parent() # the underlying field
+    F = mats[0].parent().base_ring() # the underlying field
     # At the moment F must be a finite field. 
     assert F.is_field() and F.is_finite()
+
+    if mats[0].dimensions() == (0,0):
+        return matrix( F, [] )
 
     l = mats[0].dimensions()[0] # the dimension of the module
     V = F**l # the module
