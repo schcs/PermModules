@@ -63,6 +63,66 @@ def idempotents( FG ):
     
     return idems
 
+def subgroups_with_cyclic_quotient( g ):
+    gp = g.permutation_group()
+
+    subs_gp = [ x for x in gp.subgroups() if gp.quotient(x).is_cyclic() ]
+    no_gens = len( g.gens())
+    gen_dict = { str(gp.gens()[k]): g.gens()[k] for k in range( no_gens )}
+    #return gen_dict
+    
+    subs = []
+    for h in subs_gp:
+        gens_h_perm = h.gens()
+        gens_h = []
+        for x in gens_h_perm: 
+            if x == x**0:
+                continue
+            w = x.word_problem( gp.gens(), as_list = True, display = False )
+            gens_h.append( prod( gen_dict[x[0]]**x[1] for x in w ))
+        subs.append( g.subgroup( gens_h ))
+
+    return subs 
+
+# checks if m/n is minimal normal in g/n
+# g >= m >= n
+
+def is_min_normal_subgroup( g, n, m, p ):
+
+    return n.is_subgroup( m ) and (( g.order()//n.order() > p and m.order()//n.order() == p ) or 
+                                   ( g.order()//n.order() == p and m.order() == g.order() ))
+    
+def idempotents_of_group( g, F = False ):
+
+    subs = subgroups_with_cyclic_quotient( g )
+    p = prime_divisors( g.order())[0]
+    
+    if type( F ) == bool:
+        F = pAdicField( p, 10, print_mode = "digits" )
+    
+    FG = GroupAlgebra( g, F )    
+    H_hat = lambda H: H.order()**-1*sum( FG( x ) for x in g if x in H )
+    ids = [ H_hat( g )]
+
+    for n in subs:
+        idem = FG.one()
+        to_append = False
+
+        for m in subs:
+            if is_min_normal_subgroup( g, n, m, p ):
+                print( m, n )
+                idem *= H_hat( n ) - H_hat( m )
+                to_append = True 
+        
+        if to_append: 
+            ids.append( idem )
+
+    return ids
+
+    
+
+    return subgroups_cyclic_quot
+
 def group_element_from_gap( g, el ):
     
     rep_el = el.ExtRepOfObj()
@@ -71,25 +131,3 @@ def group_element_from_gap( g, el ):
 
     g_gens = g.gens()
     return prod( [ g.gens()[int(rep_el[2*i+1])-1]**int(rep_el[2*i+2]) for i in range( len( rep_el )//2 )])
-    
-def get_idempotents_from_gap( g, F = False ):
-
-    ids = []
-    gap_g = gap( g )
-
-    p = prime_divisors( g.order())[0]
-    if type( F ) == bool:
-        F = pAdicField( p, 10, print_mode = "digits" ) 
-
-    cc = gap.ConjugacyClassesSubgroups( g )
-    cc = gap.List( cc, gap.Representative )
-    
-    subgroups_cyclic_quot = []
-
-    for h in cc:
-        if gap.IsCyclic( gap_g/h ):
-            subgroups_cyclic_quot.append( h )            
-
-
-    return subgroups_cyclic_quot
-
