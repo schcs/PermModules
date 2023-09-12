@@ -63,8 +63,21 @@ def idempotents( FG ):
     
     return idems
 
+def right_regular_action( g ):
+
+    g_elts = g.list()
+    g_gens = g.gens()
+    perms = []
+    sym_gp = SymmetricGroup( g.order()) 
+    for g in g_gens:
+        perm = sym_gp( [ g_elts.index( x*g ) + 1 for x in g_elts ])
+        perms.append( perm )
+    
+    return sym_gp.subgroup( perms, canonicalize = False )
+
+
 def subgroups_with_cyclic_quotient( g ):
-    gp = g.permutation_group()
+    gp = right_regular_action( g )
 
     subs_gp = [ x for x in gp.subgroups() if gp.quotient(x).is_cyclic() ]
     no_gens = len( g.gens())
@@ -110,7 +123,7 @@ def idempotents_of_group( g, F = False ):
 
         for m in subs:
             if is_min_normal_subgroup( g, n, m, p ):
-                print( m, n )
+                #print( m, n )
                 idem *= H_hat( n ) - H_hat( m )
                 to_append = True 
         
